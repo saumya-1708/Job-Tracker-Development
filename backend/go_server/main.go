@@ -37,7 +37,7 @@ func main() {
 	// ✅ User upload route
 	mux.HandleFunc("/api/user-details", routes.UserDetailsHandler)
 	mux.HandleFunc("/api/jobs/recommend", routes.RecommendJobsHandler)
-
+	mux.HandleFunc("/profile", routes.ProfileHandler)
 	// ✅ Serve static files from uploads folder
 	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./backend/uploads"))))
 

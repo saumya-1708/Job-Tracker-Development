@@ -1,22 +1,44 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function JobPage() {
+  const [jobs, setJobs] = useState([]);
   const [toasts, setToasts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const jobs = [
-    { id: 1, title: "Frontend Developer", company: "TechCorp", location: "Remote", type: "Full-time", website: "https://www.techcorp.com" },
-    { id: 2, title: "Backend Developer", company: "InnovateX", location: "Bangalore, India", type: "Full-time", website: "https://www.innovatex.com" },
-    { id: 3, title: "Full Stack Developer", company: "CodeWorks", location: "Hyderabad, India", type: "Part-time", website: "https://www.codeworks.com" },
-  ];
+  useEffect(() => {
+    // Simulate backend delay (2 seconds)
+    setTimeout(() => {
+      const sampleJobs = [
+        {
+          id: 1,
+          title: "Frontend Developer",
+          company: "TechNova Pvt Ltd",
+          location: "Remote",
+          type: "Full-Time",
+          website: "https://www.technova.com",
+        },
+        {
+          id: 2,
+          title: "Backend Engineer",
+          company: "CloudWorks",
+          location: "Bengaluru, India",
+          type: "Internship",
+          website: "https://www.cloudworks.com",
+        },
+        {
+          id: 3,
+          title: "UI/UX Designer",
+          company: "DesignHub",
+          location: "Chennai, India",
+          type: "Contract",
+          website: "https://www.designhub.com",
+        },
+      ];
 
-  const handleApply = (job) => {
-    const id = Date.now();
-
-    // Open company's website in a new tab
-    if (job.website) {
-      window.open(job.website, "_blank");
-    }
-  };
+      setJobs(sampleJobs);
+      setLoading(false);
+    }, 2000);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 to-white p-8 relative">
@@ -39,29 +61,45 @@ export default function JobPage() {
         Available Jobs
       </h2>
 
-      <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
-        {jobs.map((job) => (
-          <div
-            key={job.id}
-            className="bg-white p-6 rounded-2xl shadow-lg flex flex-col justify-between hover:shadow-2xl transition hover:scale-105 duration-300"
-          >
-            <div className="mb-4">
-              <h3 className="text-xl font-semibold text-teal-700 mb-1">{job.title}</h3>
-              <p className="text-gray-700 font-medium">{job.company}</p>
-              <div className="flex items-center text-gray-500 mt-1 space-x-4 text-sm">
-                <span>📍 {job.location}</span>
-                <span>⏱ {job.type}</span>
-              </div>
-            </div>
-            <button
-              onClick={() => handleApply(job)}
-              className="mt-auto bg-gradient-to-r from-teal-500 to-blue-500 text-white py-2 rounded-lg font-semibold shadow-md hover:from-teal-600 hover:to-blue-600 transition"
+      {loading ? (
+        // Loading Spinner + Message
+        <div className="flex flex-col justify-center items-center min-h-[50vh] space-y-4">
+          <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-teal-700 font-medium text-lg">
+            Getting your job recommendations...
+          </p>
+        </div>
+      ) : (
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
+          {jobs.map((job) => (
+            <div
+              key={job.id}
+              className="bg-white p-6 rounded-2xl shadow-lg flex flex-col justify-between hover:shadow-2xl transition hover:scale-105 duration-300"
             >
-              Apply Now
-            </button>
-          </div>
-        ))}
-      </div>
+              <div className="mb-4">
+                <h3 className="text-xl font-semibold text-teal-700 mb-1">
+                  {job.title}
+                </h3>
+                <p className="text-gray-700 font-medium">{job.company}</p>
+                <div className="flex items-center text-gray-500 mt-1 space-x-4 text-sm">
+                  <span>📍 {job.location}</span>
+                  <span>⏱ {job.type}</span>
+                </div>
+              </div>
+
+              {/* Go to Job Website */}
+              <a
+                href={job.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-auto bg-gradient-to-r from-teal-500 to-blue-500 text-white py-2 rounded-lg font-semibold hover:from-teal-600 hover:to-blue-600 transition text-center"
+              >
+                Go to Job
+              </a>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Tailwind custom animations */}
       <style>
@@ -70,16 +108,13 @@ export default function JobPage() {
             0% { transform: translateX(100%) scale(0.8); opacity: 0; }
             100% { transform: translateX(0) scale(1); opacity: 1; }
           }
-
           .animate-slide-in {
             animation: slide-in 0.5s ease-out forwards;
           }
-
           @keyframes progress {
             0% { width: 100%; }
             100% { width: 0%; }
           }
-
           .animate-progress {
             animation: progress 3s linear forwards;
           }

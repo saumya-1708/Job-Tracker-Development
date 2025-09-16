@@ -66,31 +66,39 @@ func Login(email, password string) (bool, string) {
 	var storedUser models.User
 	err := db.UserCollection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&storedUser)
 	if err != nil {
+		fmt.Println("Login error: user not found")
 		return false, ""
-	} 
+	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(password))
 	if err != nil {
+		fmt.Println("Login error: invalid password for", email)
 		return false, ""
-	} 
- 
+	}
+
+	// Generate tokens
 	accessToken, _ := generateToken(email, time.Minute*15)
 	refreshToken, _ := generateToken(email, time.Hour*24*7)
 
-	// Store refresh token in separate DB with expiry
+	// Store refresh token in DB with logging
 	refreshRecord := RefreshTokenRecord{
-		Email:  email,
-		Token:     refreshToken, 
+		Email:     email,
+		Token:     refreshToken,
 		ExpiresAt: time.Now().Add(time.Hour * 24 * 7),
 		CreatedAt: time.Now(),
-	} 
-	_, err = db.RefreshTokenCollection.InsertOne(context.TODO(), refreshRecord)
+	}
+
+	insertResult, err := db.RefreshTokenCollection.InsertOne(context.TODO(), refreshRecord)
 	if err != nil {
+		fmt.Println("Error inserting refresh token for", email, ":", err)
 		return false, ""
+	} else {
+		fmt.Println("Refresh token inserted successfully with ID:", insertResult.InsertedID)
 	}
 
 	return true, accessToken
 }
+
 
 func generateToken(email string, duration time.Duration) (string, error) {
 	expirationTime := time.Now().Add(duration)

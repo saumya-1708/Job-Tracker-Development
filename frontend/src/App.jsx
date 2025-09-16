@@ -4,6 +4,7 @@ import SignUpPage from "./components/SignUpPage";
 import WelcomePage from "./components/WelcomePage";
 import JobPage from "./components/JobPage";
 import UserDetailsPage from "./components/UserDetailsPage";
+import ProfilePage from "./components/ProfilePage";
 
 export default function App() {
   return (
@@ -20,6 +21,8 @@ export default function App() {
         <Route path="/jobs" element={<JobPage />} />  
         {/* User Details page */}
         <Route path="/user-details" element={<UserDetailsPage />} /> 
+        {/* Profile page*/}
+        <Route path='/profile' element={<ProfilePage/>}/>
       </Routes>
     </Router>
   );
