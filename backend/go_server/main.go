@@ -5,15 +5,18 @@ import (
 	"net/http"
 
 	"backend/go_server/db"
+	"backend/go_server/middleware"
 	"backend/go_server/routes"
 )
 
-// ✅ CORS setup
+// enableCORS sets CORS headers for requests
 func enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		// Uncomment if you use cookies or credentials
+		// w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
@@ -23,25 +26,35 @@ func enableCORS(next http.Handler) http.Handler {
 	})
 }
 
+// loggingMiddleware logs each request
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
-	// ✅ Initialize MongoDB
+	// Initialize MongoDB
 	db.InitMongo()
 
-	// ✅ Create mux
+	// Create mux
 	mux := http.NewServeMux()
 
-	// Auth routes
+	// Public routes (no JWT required)
 	mux.HandleFunc("/signup", routes.SignupHandler)
 	mux.HandleFunc("/login", routes.LoginHandler)
 
-	// ✅ User upload route
-	mux.HandleFunc("/api/user-details", routes.UserDetailsHandler)
-	mux.HandleFunc("/api/jobs/recommend", routes.RecommendJobsHandler)
-	mux.HandleFunc("/profile", routes.ProfileHandler)
-	// ✅ Serve static files from uploads folder
-	mux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir("./backend/uploads"))))
+	// Protected routes (JWT required)
+    mux.Handle("/preferences", middleware.JWTAuth(http.HandlerFunc(routes.PreferencesHandler)))
+    mux.Handle("/recommend-jobs", middleware.JWTAuth(http.HandlerFunc(routes.JobsDataHandler)))
+	mux.Handle("/profile", middleware.JWTAuth(http.HandlerFunc(routes.ProfileHandler)))
+	mux.Handle("/jobs-data", middleware.JWTAuth(http.HandlerFunc(routes.JobsDataHandler)))
 
-	// ✅ Start server
+	// Wrap mux with CORS and logging middleware
+	handler := enableCORS(loggingMiddleware(mux))
+
+	// Start server
 	log.Println("🚀 Server running on :8080")
-	log.Fatal(http.ListenAndServe(":8080", enableCORS(mux)))
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }

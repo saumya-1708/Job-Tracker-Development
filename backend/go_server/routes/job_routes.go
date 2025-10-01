@@ -1,79 +1,82 @@
 package routes
 
 import (
-	"backend/go_server/db"
-	"backend/go_server/models"
-	"bytes"
-	"context"
-	"encoding/json"
-	"io"
-	"net/http"
+    "context"
+    "encoding/json"
+    "net/http"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+    "backend/go_server/db"
+    "backend/go_server/middleware"
+    "backend/go_server/models"
+
+    "go.mongodb.org/mongo-driver/bson"
 )
 
-func RecommendJobsHandler(w http.ResponseWriter, r *http.Request) {
+// JobsDataHandler fetches jobs for the logged-in user based on preference
+func JobsDataHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Parse JSON body to get userId
+	// Get username from JWT (set by middleware)
+	usernameCtx := r.Context().Value(middleware.ContextUsernameKey)
+	username, ok := usernameCtx.(string)
+	if !ok || username == "" {
+		http.Error(w, "Unauthorized: username not found", http.StatusUnauthorized)
+		return
+	}
+
+	// Parse request body to get preferenceId
 	var req struct {
-		UserId string `json:"userId"`
+		PreferenceID string `json:"preferenceId"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
-	// Convert userId to ObjectID
-	userObjectID, err := primitive.ObjectIDFromHex(req.UserId)
-	if err != nil {
-		http.Error(w, "Invalid userId", http.StatusBadRequest)
-		return
+	// Find jobs for this username and preference
+	filter := bson.M{"username": username}
+	if req.PreferenceID != "" {
+		filter["preferenceId"] = req.PreferenceID
 	}
 
-	// Fetch user from MongoDB
-	var user models.UserDetails
-	err = db.UserDetailsCollection.FindOne(context.Background(), bson.M{"_id": userObjectID}).Decode(&user)
-	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
-		return
-	}
-
-	// Fetch all jobs from MongoDB
-	cursor, err := db.Client.Database("jobsdb").Collection("jobs").Find(context.Background(), bson.M{})
+    cursor, err := db.JobsCollection.Find(context.TODO(), filter)
 	if err != nil {
 		http.Error(w, "Failed to fetch jobs", http.StatusInternalServerError)
 		return
 	}
-	defer cursor.Close(context.Background())
+	defer cursor.Close(context.TODO())
 
-	var jobs []models.Job
-	if err = cursor.All(context.Background(), &jobs); err != nil {
-		http.Error(w, "Failed to parse jobs", http.StatusInternalServerError)
-		return
+    var jobs []models.Job
+    if err := cursor.All(context.TODO(), &jobs); err != nil {
+        http.Error(w, "Failed to parse jobs", http.StatusInternalServerError)
+        return
+    }
+
+	// Convert jobs to frontend-friendly format
+	type JobResponse struct {
+		Title    string   `json:"Title"`
+		Company  string   `json:"Company"`
+		Website  string   `json:"Website"`
+		Location string   `json:"Location"`
+		Type     string   `json:"Type"`
+		Skills   []string `json:"Skills"`
 	}
 
-	// Prepare payload for Python
-	payload := map[string]interface{}{
-		"user": user,
-		"jobs": jobs,
+	var resp []JobResponse
+    for _, job := range jobs {
+		resp = append(resp, JobResponse{
+            Title:    job.Title,
+            Company:  job.Company,
+            Website:  job.Website,
+            Location: "Remote",
+            Type:     "Full-Time",
+            Skills:   job.Skills,
+		})
 	}
 
-	payloadBytes, _ := json.Marshal(payload)
-
-	// Call Python service
-	resp, err := http.Post("http://localhost:8000/recommend-jobs", "application/json", bytes.NewBuffer(payloadBytes))
-	if err != nil {
-		http.Error(w, "Python service error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer resp.Body.Close()
-
-	body, _ := io.ReadAll(resp.Body)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(body)
+	json.NewEncoder(w).Encode(resp)
 }

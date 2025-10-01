@@ -7,33 +7,32 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
+  e.preventDefault();
+  const email = e.target.email.value.trim();
+  const password = e.target.password.value;
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(email)) {
-      alert("Please enter a valid email address.");
-      return;
-    }
+  try {
+    const res = await fetch("http://localhost:8080/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-    try {
-      const res = await fetch("http://localhost:8080/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+    if (!res.ok) throw new Error("Login failed");
 
-      if (!res.ok) throw new Error("Login failed");
+    const data = await res.json();
 
-      const data = await res.json();
-      localStorage.setItem("access_token", data.access_token);
-      navigate("/welcome");
-    } catch (err) {
-      console.error(err);
-      alert("Network issue or login failed");
-    }
-  };
+    // ✅ Store access token & username
+    localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("username", data.username);
+
+    navigate("/welcome");
+  } catch (err) {
+    console.error(err);
+    alert("Network issue or login failed");
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-white p-4">

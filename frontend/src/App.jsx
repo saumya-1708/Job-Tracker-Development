@@ -3,7 +3,7 @@ import LoginPage from "./components/LoginPage";
 import SignUpPage from "./components/SignUpPage";
 import WelcomePage from "./components/WelcomePage";
 import JobPage from "./components/JobPage";
-import UserDetailsPage from "./components/UserDetailsPage";
+import PreferencesPage from "./components/PreferencesPage";
 import ProfilePage from "./components/ProfilePage";
 
 export default function App() {
@@ -20,7 +20,7 @@ export default function App() {
         {/* Jobs page */}
         <Route path="/jobs" element={<JobPage />} />  
         {/* User Details page */}
-        <Route path="/user-details" element={<UserDetailsPage />} /> 
+        <Route path="/preferences" element={<PreferencesPage />} /> 
         {/* Profile page*/}
         <Route path='/profile' element={<ProfilePage/>}/>
       </Routes>

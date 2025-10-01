@@ -2,20 +2,33 @@ import { useEffect, useState } from "react";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // Fetch user profile from backend
     const fetchProfile = async () => {
       try {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          setError("To view your profile, please log in or sign up.");
+          return;
+        }
+
         const res = await fetch("http://localhost:8080/profile", {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Send token to backend
+          },
         });
-        if (!res.ok) throw new Error("Failed to fetch profile");
+
+        if (!res.ok) {
+          throw new Error("Failed to fetch profile. Please login again.");
+        }
+
         const data = await res.json();
         setProfile(data);
       } catch (err) {
-        console.error(err);
+        setError(err.message);
       }
     };
 
@@ -28,6 +41,10 @@ export default function ProfilePage() {
         <h2 className="text-3xl font-bold text-center text-teal-700 mb-6">
           My Profile
         </h2>
+
+        {error && (
+          <p className="text-center text-red-500 mb-4">{error}</p>
+        )}
 
         {profile ? (
           <div className="space-y-6">
@@ -63,7 +80,7 @@ export default function ProfilePage() {
             </button>
           </div>
         ) : (
-          <p className="text-center text-gray-500">Loading profile...</p>
+          !error && <p className="text-center text-gray-500">Loading profile...</p>
         )}
       </div>
     </div>

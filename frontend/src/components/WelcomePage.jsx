@@ -6,10 +6,28 @@ export default function WelcomePage() {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear authentication here if needed
+    // Clear authentication
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("userId");
     console.log("Logged out");
     navigate("/login");
   };
+
+  const handleGetStarted = () => {
+  const username = localStorage.getItem("username"); 
+  const accessToken = localStorage.getItem("access_token");
+
+  if (!username || !accessToken) {
+    alert("User not found. Please login again.");
+    navigate("/login");
+    return;
+  }
+
+  // ✅ Navigate to PreferencesPage
+  navigate("/preferences", { state: { username, accessToken } });
+};
+
+
 
   return (
     <div className="bg-gradient-to-b from-teal-50 to-white min-h-screen text-gray-800 flex flex-col">
@@ -17,7 +35,6 @@ export default function WelcomePage() {
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-teal-600">JobTracker</h1>
 
-          {/* Profile + Logout buttons */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/profile")}
@@ -54,7 +71,7 @@ export default function WelcomePage() {
           Manage applications, follow up with recruiters, and secure your dream job with JobTracker.
         </motion.p>
         <motion.button
-          onClick={() => navigate("/user-details")}
+          onClick={handleGetStarted}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className="bg-gradient-to-r from-teal-500 to-blue-500 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:from-teal-600 hover:to-blue-600 transition"

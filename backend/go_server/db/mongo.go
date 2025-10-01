@@ -14,7 +14,9 @@ import (
 var Client *mongo.Client
 var UserCollection *mongo.Collection
 var RefreshTokenCollection *mongo.Collection
-var UserDetailsCollection *mongo.Collection // ✅ new collection
+var PreferencesCollection *mongo.Collection 
+var JobsCollection *mongo.Collection 
+
 
 func InitMongo() {
 	// Load environment variables from .env file
@@ -40,12 +42,22 @@ func InitMongo() {
 
 	// Database for users
 	UserCollection = Client.Database("authdb").Collection("users")
+	// indexModel := mongo.IndexModel{
+	// 	Keys:    bson.D{{Key: "email", Value: 1}},
+	// 	Options: options.Index().SetUnique(true),
+	// }
+	// _, err = UserCollection.Indexes().CreateOne(context.Background(), indexModel)
+	// if err != nil {
+	// 	log.Fatalf("❌ Could not create index on email: %v", err)
+	//}
 
 	// Separate database for refresh tokens
 	RefreshTokenCollection = Client.Database("token_db").Collection("refresh_tokens")
 
-	// ✅ New collection for user details
-	UserDetailsCollection = Client.Database("authdb").Collection("user_details")
+	// ✅ New collection for user preferences
+	PreferencesCollection = Client.Database("authdb").Collection("preferences")
 
+	//New collection for jobs
+	JobsCollection = Client.Database("job_db").Collection("jobs")
 	log.Println("✅ Connected to MongoDB")
 }
