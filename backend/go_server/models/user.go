@@ -7,5 +7,5 @@ type User struct {
     Password string             `json:"password" bson:"password"`
     Phone    string             `json:"phone" bson:"phone"`
     Username string             `json:"username" bson:"username"`
-    ResumeID *primitive.ObjectID `json:"resumeId,omitempty" bson:"resumeId,omitempty"`
+    ResumeID *primitive.ObjectID `json:"resumeId" bson:"resumeId"`
 }

@@ -65,6 +65,7 @@ func Signup(user models.User) error {
         "password": user.Password,
         "phone":    user.Phone,
         "username": user.Username,
+        "resumeId": user.ResumeID,
     })
     if err != nil {
         return fmt.Errorf("failed to insert user: %w", err)

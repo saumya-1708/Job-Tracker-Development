@@ -75,9 +75,8 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <button className="w-full bg-gradient-to-r from-teal-500 to-blue-500 text-white py-2 rounded-lg font-semibold shadow-md hover:from-teal-600 hover:to-blue-600 transition">
-              Edit Profile
-            </button>
+
+            
           </div>
         ) : (
           !error && <p className="text-center text-gray-500">Loading profile...</p>
