@@ -43,7 +43,7 @@ func PreferencesHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("❌ Failed to decode JSON:", err)
 		http.Error(w, "Invalid JSON: "+err.Error(), http.StatusBadRequest)
 		return
-	}
+	} 
 	log.Printf("Decoded preferences: %+v\n", prefs)
 
 	// Basic validation

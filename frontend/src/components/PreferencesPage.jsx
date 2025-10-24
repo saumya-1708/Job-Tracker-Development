@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 export default function PreferencesPage() {
   const navigate = useNavigate();
@@ -61,29 +62,41 @@ export default function PreferencesPage() {
 
     try {
       console.log("Submitting preferences:", userDetails);
-      const res = await fetch("http://localhost:8080/preferences", {
+
+      // Fire-and-forget request (no await)
+      fetch("http://localhost:8080/preferences", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${accessToken}`
+          "Authorization": `Bearer ${accessToken}`,
         },
         body: JSON.stringify(userDetails),
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.text().then(errText => {
+            console.error("Backend error:", errText);
+          });
+        }
+        console.log("Preferences saved successfully");
+      })
+      .catch(err => {
+        console.error("Network issue:", err);
       });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error("Backend error:", errText);
-        throw new Error("Failed to save user preferences");
-      }
-
+      // Immediately navigate — no waiting for backend
       navigate("/jobs");
+
     } catch (err) {
       console.error(err);
-      alert("Network issue or submission failed");
+      alert("Unexpected error occurred");
     }
   };
 
+
   return (
+    <>
+    <Navbar/>
     <div className="max-w-lg mx-auto mt-10 p-6 shadow-lg rounded-xl bg-white">
       <h2 className="text-2xl font-bold mb-6">Your Preferences</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -142,5 +155,6 @@ export default function PreferencesPage() {
         <button type="submit" className="w-full bg-gradient-to-r from-teal-500 to-blue-500 text-white py-3 rounded-lg font-semibold shadow-md hover:from-teal-600 hover:to-blue-600 transition duration-300">Submit</button>
       </form>
     </div>
+    </>
   );
 }

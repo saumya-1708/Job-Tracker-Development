@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Navbar from "../components/Navbar";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -36,6 +37,8 @@ export default function ProfilePage() {
   }, []);
 
   return (
+    <>
+    <Navbar/>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-white p-6">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-lg p-8">
         <h2 className="text-3xl font-bold text-center text-teal-700 mb-6">
@@ -83,5 +86,6 @@ export default function ProfilePage() {
         )}
       </div>
     </div>
+    </>
   );
 }

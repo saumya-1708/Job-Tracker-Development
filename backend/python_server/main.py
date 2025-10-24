@@ -123,8 +123,8 @@ def scrape_jobs(keywords: List[str]) -> Dict[str, List[str]]:
 @app.post("/recommend-jobs")
 async def recommend_jobs(file: UploadFile = File(...)):
     """
-    Endpoint to receive resume file, extract skills, scrape jobs,
-    and then send results to a Go server.
+    Endpoint to receive resume file, extract skills,
+    and send hardcoded job data to Go server (for testing).
     """
     # 1. Read the file content
     file_content = await file.read()
@@ -139,24 +139,47 @@ async def recommend_jobs(file: UploadFile = File(...)):
     else:
         resume_text = file_content.decode("utf-8")
 
-    # 2. Extract keywords from the resume
+    # 2. Extract keywords (dummy)
     keywords = extract_keywords_from_resume(resume_text)
-    
-    # 3. Scrape jobs from the internet based on the extracted keywords
-    fetched_jobs = scrape_jobs(keywords)
 
-    # 4. Send the scraped jobs as a JSON payload to the Go server
+    # 3. Hardcoded sample jobs (for testing)
+    fetched_jobs = {
+        "Software Engineer": [
+            "https://careers.google.com/jobs/results/12345-software-engineer/",
+            "https://www.linkedin.com/jobs/view/67890/"
+        ],
+        "JavaScript Developer": [
+            "https://jobs.microsoft.com/developer/98765",
+            "https://www.naukri.com/javascript-developer-jobs"
+        ],
+        "Python Developer": [
+            "https://boards.greenhouse.io/openai/jobs/43210",
+            "https://remoteok.com/remote-python-jobs"
+        ]
+    }
+
+    # 4. Send the hardcoded job data to the Go server
     try:
-        print(f"📦 Sending results to Go server at {GO_SERVER_URL}")
+        print(f"📦 Sending hardcoded results to Go server at {GO_SERVER_URL}")
         response = requests.post(GO_SERVER_URL, json=fetched_jobs, timeout=30)
         
         if response.status_code == 200:
             print("✅ Successfully sent job data to Go server.")
-            return {"status": "success", "message": "Job data sent to Go server."}
+            return {
+                "status": "success",
+                "message": "Hardcoded job data sent to Go server successfully.",
+                "data_sent": fetched_jobs
+            }
         else:
             print(f"❌ Failed to send data. Status code: {response.status_code}")
-            return {"status": "error", "message": "Failed to send data to Go server."}
+            return {
+                "status": "error",
+                "message": f"Failed to send data to Go server. Status code: {response.status_code}"
+            }
             
     except requests.exceptions.RequestException as e:
         print(f"❌ An error occurred while connecting to the Go server: {e}")
-        return {"status": "error", "message": f"Connection error: {e}"}
+        return {
+            "status": "error",
+            "message": f"Connection error: {e}"
+        }

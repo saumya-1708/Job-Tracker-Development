@@ -1,57 +1,26 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { User, LogOut } from "lucide-react";
+import Navbar from "../components/Navbar"; // ✅ Import the new Navbar
 
 export default function WelcomePage() {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // Clear authentication
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("userId");
-    console.log("Logged out");
-    navigate("/login");
-  };
-
   const handleGetStarted = () => {
-  const username = localStorage.getItem("username"); 
-  const accessToken = localStorage.getItem("access_token");
+    const username = localStorage.getItem("username");
+    const accessToken = localStorage.getItem("access_token");
 
-  if (!username || !accessToken) {
-    alert("User not found. Please login again.");
-    navigate("/login");
-    return;
-  }
+    if (!username || !accessToken) {
+      alert("User not found. Please login again.");
+      navigate("/login");
+      return;
+    }
 
-  // ✅ Navigate to PreferencesPage
-  navigate("/preferences", { state: { username, accessToken } });
-};
-
-
+    navigate("/preferences", { state: { username, accessToken } });
+  };
 
   return (
     <div className="bg-gradient-to-b from-teal-50 to-white min-h-screen text-gray-800 flex flex-col">
-      <nav className="sticky top-0 z-50 bg-white bg-opacity-80 backdrop-blur-md shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-teal-600">JobTracker</h1>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate("/profile")}
-              className="p-2 rounded-full hover:bg-teal-100 transition"
-            >
-              <User className="h-6 w-6 text-teal-700" />
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1 bg-teal-600 text-white px-3 py-2 rounded-lg font-medium hover:bg-teal-700 transition"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </button>
-          </div>
-        </div>
-      </nav>
+      <Navbar /> {/* ✅ Reusable Navbar component */}
 
       <section className="flex-1 flex flex-col justify-center items-center text-center px-4">
         <motion.h1
@@ -62,6 +31,7 @@ export default function WelcomePage() {
         >
           Land your dream Job
         </motion.h1>
+
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -70,6 +40,7 @@ export default function WelcomePage() {
         >
           Manage applications, follow up with recruiters, and secure your dream job with JobTracker.
         </motion.p>
+
         <motion.button
           onClick={handleGetStarted}
           whileHover={{ scale: 1.05 }}

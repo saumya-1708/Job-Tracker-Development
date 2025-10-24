@@ -50,6 +50,8 @@ func main() {
     mux.Handle("/recommend-jobs", middleware.JWTAuth(http.HandlerFunc(routes.JobsDataHandler)))
 	mux.Handle("/profile", middleware.JWTAuth(http.HandlerFunc(routes.ProfileHandler)))
 	mux.Handle("/jobs-data", middleware.JWTAuth(http.HandlerFunc(routes.JobsDataHandler)))
+	mux.Handle("/jobs-history", middleware.JWTAuth(http.HandlerFunc(routes.JobsHistoryHandler)))
+
 
 	// Wrap mux with CORS and logging middleware
 	handler := enableCORS(loggingMiddleware(mux))

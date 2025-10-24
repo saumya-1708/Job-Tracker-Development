@@ -1,113 +1,122 @@
 import { useState, useEffect } from "react";
+import Navbar from "../components/Navbar";
 
-export default function JobPage({ preferenceId }) {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function JobPage() {
+  const [history, setHistory] = useState([]);
   const [toasts, setToasts] = useState([]);
 
+  // 🧾 Fetch request history
   useEffect(() => {
-    setLoading(true);
-
-    const fetchJobs = async () => {
-      const startTime = Date.now();
+    const fetchHistory = async () => {
       try {
         const token = localStorage.getItem("access_token");
-        if (!token) throw new Error("User not logged in");
-
-        const res = await fetch("http://localhost:8080/jobs-data", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify({ preferenceId }),
+        const res = await fetch("http://localhost:8080/jobs-history", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-
-        if (!res.ok) throw new Error("Failed to fetch jobs");
-
+        if (!res.ok) throw new Error("Failed to fetch history");
         const data = await res.json();
-
-        // Ensure jobs is always an array
-        setJobs(Array.isArray(data) ? data : []);
+        setHistory(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error(err);
+        console.error("❌ Error fetching history:", err);
         setToasts(prev => [
           ...prev,
-          { id: Date.now(), message: "Error fetching jobs. Try again!" },
+          { id: Date.now(), message: "Error fetching history" },
         ]);
-        setJobs([]);
-      } finally {
-        const elapsed = Date.now() - startTime;
-        const minSpinner = 500;
-        const remaining = minSpinner - elapsed;
-        if (remaining > 0) await new Promise(r => setTimeout(r, remaining));
-        setLoading(false);
       }
     };
+    fetchHistory();
+  }, []);
 
-    const timeoutId = setTimeout(fetchJobs, 50);
-    return () => clearTimeout(timeoutId);
-  }, [preferenceId]);
+  // 💾 Download jobs as JSON
+  const handleDownload = (prefId) => {
+    const item = history.find(h => h.PreferenceID === prefId);
+    if (!item || !item.Jobs) return;
+
+    const blob = new Blob([JSON.stringify(item.Jobs, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `jobs_${prefId}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-white p-8 relative">
-      {/* Toasts */}
-      <div className="fixed top-6 right-6 flex flex-col space-y-3 z-50">
-        {toasts.map(toast => (
-          <div
-            key={toast.id}
-            className="bg-teal-500 text-white px-4 py-2 rounded-lg shadow-md"
-          >
-            {toast.message}
-          </div>
-        ))}
-      </div>
-
-      <h2 className="text-3xl font-bold text-teal-700 mb-8 text-center">
-        Available Jobs
-      </h2>
-
-      {loading ? (
-        <div className="flex flex-col justify-center items-center min-h-[50vh] space-y-4">
-          <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-teal-700 font-medium text-lg">
-            Getting your job recommendations...
-          </p>
-        </div>
-      ) : !Array.isArray(jobs) || jobs.length === 0 ? (
-        <div className="text-center text-teal-700 font-medium text-lg space-y-2">
-          <p> No jobs found for your preferences.</p>
-        </div>
-      ) : (
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6">
-          {jobs.map((job, idx) => (
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-white p-8 pt-24 relative">
+        {/* Toasts */}
+        <div className="fixed top-6 right-6 flex flex-col space-y-3 z-50">
+          {toasts.map(toast => (
             <div
-              key={idx}
-              className="bg-white p-6 rounded-2xl shadow-lg flex flex-col justify-between hover:shadow-2xl transition hover:scale-105 duration-300"
+              key={toast.id}
+              className="bg-teal-500 text-white px-4 py-2 rounded-lg shadow-md"
             >
-              <div className="mb-4">
-                <h3 className="text-xl font-semibold text-teal-700 mb-1">
-                  {job.Title}
-                </h3>
-                <p className="text-gray-700 font-medium">{job.Company}</p>
-                <div className="flex items-center text-gray-500 mt-1 space-x-4 text-sm">
-                  <span>📍 {job.Location}</span>
-                  <span>💼 {job.Type}</span>
-                </div>
-              </div>
-
-              <a
-                href={job.Website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-auto bg-gradient-to-r from-teal-500 to-blue-500 text-white py-2 rounded-lg font-semibold hover:from-teal-600 hover:to-blue-600 transition text-center"
-              >
-                Go to Job
-              </a>
+              {toast.message}
             </div>
           ))}
         </div>
-      )}
-    </div>
+
+        <h2 className="text-3xl font-bold text-teal-700 mb-6 text-center">
+          Job Requests History
+        </h2>
+
+        {/* History Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full border border-gray-200 rounded-lg shadow-md">
+            <thead className="bg-teal-600 text-white">
+              <tr>
+                <th className="p-3 text-left">Preference ID</th>
+                <th className="p-3 text-left">Status</th>
+                <th className="p-3 text-left">Job Count</th>
+                <th className="p-3 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {history.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="text-center p-4 text-gray-600">
+                    No requests found
+                  </td>
+                </tr>
+              ) : (
+                history.map((item, idx) => (
+                  <tr
+                    key={idx}
+                    className="border-t hover:bg-teal-50 transition-colors"
+                  >
+                    <td className="p-3 font-mono text-sm">{item.PreferenceID}</td>
+                    <td className="p-3">
+                      {item.Status === "Success" ? (
+                        <span className="text-green-600 font-semibold">🟢 Success</span>
+                      ) : (
+                        <span className="text-red-600 font-semibold">🔴 Failed</span>
+                      )}
+                    </td>
+                    <td className="p-3">{item.JobCount || 0}</td>
+                    <td className="p-3 flex gap-3">
+                      <button
+                        onClick={() => window.location.reload()}
+                        className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                      >
+                        View Jobs
+                      </button>
+                      <button
+                        onClick={() => handleDownload(item.PreferenceID)}
+                        className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                      >
+                        Download
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </>
   );
 }

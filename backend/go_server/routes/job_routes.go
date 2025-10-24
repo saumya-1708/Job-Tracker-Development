@@ -1,16 +1,17 @@
 package routes
 
 import (
-    "context"
-    "encoding/json"
-    "log"
-    "net/http"
+	"context"
+	"encoding/json"
+	"log"
+	"net/http"
 
-    "backend/go_server/db"
-    "backend/go_server/middleware"
-    "backend/go_server/models"
+	"backend/go_server/db"
+	"backend/go_server/middleware"
+	"backend/go_server/models"
 
-    "go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // JobsDataHandler fetches jobs for the logged-in user based on preference
@@ -101,3 +102,68 @@ func JobsDataHandler(w http.ResponseWriter, r *http.Request) {
     json.NewEncoder(w).Encode(resp)
     log.Println("✅ Response sent with", len(resp), "jobs")
 }
+
+// JobsHistoryHandler returns all job recommendation requests made by the user
+func JobsHistoryHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodGet {
+        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+        return
+    }
+
+    usernameCtx := r.Context().Value(middleware.ContextUsernameKey)
+    username, ok := usernameCtx.(string)
+    if !ok || username == "" {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+
+    log.Println("📜 Fetching job request history for:", username)
+
+    // Fetch all preference records for this user
+    cursor, err := db.PreferencesCollection.Find(context.TODO(), bson.M{"username": username})
+    if err != nil {
+        log.Println("❌ Error fetching preferences:", err)
+        http.Error(w, "Failed to fetch preferences", http.StatusInternalServerError)
+        return
+    }
+    defer cursor.Close(context.TODO())
+
+    var prefs []bson.M
+    if err := cursor.All(context.TODO(), &prefs); err != nil {
+        log.Println("❌ Error parsing preferences:", err)
+        http.Error(w, "Failed to parse preferences", http.StatusInternalServerError)
+        return
+    }
+
+    // Build response
+    var history []map[string]interface{}
+    for _, pref := range prefs {
+        prefID := ""
+        if id, ok := pref["_id"].(primitive.ObjectID); ok {
+            prefID = id.Hex()
+        }
+
+        // Check if jobs exist for this preference
+        jobCount, _ := db.JobsCollection.CountDocuments(context.TODO(), bson.M{
+            "username":     username,
+            "preferenceId": prefID,
+        })
+
+        status := "Failed"
+        if jobCount > 0 {
+            status = "Success"
+        }
+
+        history = append(history, map[string]interface{}{
+            "PreferenceID": prefID,
+            "CreatedAt":    pref["createdAt"],
+            "Status":       status,
+            "JobCount":     jobCount,
+        })
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(history)
+    log.Println("✅ History returned:", len(history))
+}
+

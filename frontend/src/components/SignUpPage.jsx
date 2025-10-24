@@ -2,6 +2,7 @@ import { useState } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { Link, useNavigate } from "react-router-dom";
 import { useDropzone } from "react-dropzone";
+import Navbar from "../components/Navbar";
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -74,6 +75,8 @@ export default function SignUpPage() {
   };
 
   return (
+    <>
+    <Navbar showAuthButtons={false}/>
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-white p-4">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
         <h2 className="text-3xl font-bold text-center text-teal-700 mb-6">
@@ -195,11 +198,12 @@ export default function SignUpPage() {
 
         <p className="text-center text-teal-700 text-sm mt-4">
           Already have an account?{" "}
-          <Link to="/" className="text-blue-600 hover:underline">
+          <Link to="/login" className="text-blue-600 hover:underline">
             Sign In
           </Link>
         </p>
       </div>
     </div>
+    </>
   );
 }
