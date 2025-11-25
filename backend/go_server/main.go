@@ -47,9 +47,7 @@ func main() {
 
 	// Protected routes (JWT required)
     mux.Handle("/preferences", middleware.JWTAuth(http.HandlerFunc(routes.PreferencesHandler)))
-    mux.Handle("/recommend-jobs", middleware.JWTAuth(http.HandlerFunc(routes.JobsDataHandler)))
 	mux.Handle("/profile", middleware.JWTAuth(http.HandlerFunc(routes.ProfileHandler)))
-	mux.Handle("/jobs-data", middleware.JWTAuth(http.HandlerFunc(routes.JobsDataHandler)))
 	mux.Handle("/jobs-history", middleware.JWTAuth(http.HandlerFunc(routes.JobsHistoryHandler)))
 
 

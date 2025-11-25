@@ -56,7 +56,7 @@ func InitMongo() {
 
 	// ✅ New collection for user preferences
 	PreferencesCollection = Client.Database("authdb").Collection("preferences")
-
+	
 	//New collection for jobs
 	JobsCollection = Client.Database("job_db").Collection("jobs")
 	log.Println("✅ Connected to MongoDB")

@@ -1,6 +1,6 @@
-// src/components/Navbar.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link as ScrollLink } from "react-scroll";
 import { User, LogOut, LogIn } from "lucide-react";
 
 export default function Navbar({ showAuthButtons = true }) {
@@ -19,7 +19,6 @@ export default function Navbar({ showAuthButtons = true }) {
     localStorage.removeItem("access_token");
     localStorage.removeItem("userId");
     localStorage.removeItem("username");
-    console.log("Logged out");
     setIsLoggedIn(false);
     navigate("/welcome");
   };
@@ -29,45 +28,69 @@ export default function Navbar({ showAuthButtons = true }) {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 bg-white bg-opacity-80 backdrop-blur-md shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-        {/* App Name */}
+    <nav
+      className="fixed top-0 left-0 w-full z-50 
+      bg-white/70 backdrop-blur-lg border-b border-[#D0E2FF]/50 
+      shadow-[0_4px_20px_rgba(0,0,0,0.05)] transition-all duration-300"
+    >
+      <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
+        {/* 🔹 Logo / App Name */}
         <h1
           onClick={() => navigate("/")}
-          className="text-2xl font-bold text-teal-600 cursor-pointer"
+          className="text-2xl font-bold bg-gradient-to-r from-[#0047AB] to-[#00BFFF] bg-clip-text text-transparent cursor-pointer hover:opacity-80 transition-opacity"
         >
-          JobTracker
+          🔍JobTracker
         </h1>
 
-        {/* Conditionally render auth buttons */}
+        {/* 🔹 Scroll Links */}
+        <div className="hidden md:flex gap-8 text-[#1F2A44] font-medium">
+          {[
+            { to: "hero", label: "Home" },
+            { to: "about", label: "About" },
+            { to: "how-it-works", label: "How It Works" },
+            { to: "features", label: "Features" },
+            { to: "contact", label: "Contact" },
+          ].map((link) => (
+            <ScrollLink
+              key={link.to}
+              to={link.to}
+              smooth={true}
+              duration={600}
+              offset={-80}
+              className="cursor-pointer relative group"
+            >
+              <span className="transition-all duration-300 group-hover:text-[#0047AB]">
+                {link.label}
+              </span>
+              <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-gradient-to-r from-[#0047AB] to-[#00BFFF] transition-all duration-300 group-hover:w-full"></span>
+            </ScrollLink>
+          ))}
+        </div>
+
+        {/* 🔹 Auth Buttons */}
         {showAuthButtons && (
           <div className="flex items-center gap-4">
             {isLoggedIn ? (
               <>
-
-                {/* Profile Button */}
                 <button
                   onClick={() => navigate("/profile")}
-                  className="p-2 rounded-full hover:bg-teal-100 transition"
+                  className="p-2 rounded-full hover:bg-[#E8F0FF] transition-colors duration-300"
+                  title={username}
                 >
-                  <User className="h-6 w-6 text-teal-700" />
+                  <User className="h-6 w-6 text-[#0047AB]" />
                 </button>
-
-                {/* Logout Button */}
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1 bg-teal-600 text-white px-3 py-2 rounded-lg font-medium hover:bg-teal-700 transition"
+                  className="flex items-center gap-1 bg-gradient-to-r from-[#0047AB] to-[#00BFFF] text-white px-3 py-2 rounded-lg font-medium shadow-md hover:opacity-90 transition"
                 >
-                  <LogOut className="h-4 w-4" />
                   Logout
                 </button>
               </>
             ) : (
               <button
                 onClick={handleLogin}
-                className="flex items-center gap-1 bg-teal-600 text-white px-3 py-2 rounded-lg font-medium hover:bg-teal-700 transition"
+                className="flex items-center gap-1 bg-gradient-to-r from-[#0047AB] to-[#00BFFF] text-white px-3 py-2 rounded-lg font-medium shadow-md hover:opacity-90 transition"
               >
-                <LogIn className="h-4 w-4" />
                 Login
               </button>
             )}

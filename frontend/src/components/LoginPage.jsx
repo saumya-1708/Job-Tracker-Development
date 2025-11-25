@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../components/Navbar"; // ✅ import Navbar
+import Navbar from "../components/Navbar";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,7 +23,6 @@ export default function LoginPage() {
       if (!res.ok) throw new Error("Login failed");
       const data = await res.json();
 
-      // ✅ Store access token & username
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("username", data.username);
 
@@ -35,39 +35,57 @@ export default function LoginPage() {
 
   return (
     <>
-      <Navbar showAuthButtons={false} /> {/* ✅ Navbar without buttons */}
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 to-white p-4 pt-24">
-        <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-8">
-          <h2 className="text-3xl font-bold text-center text-teal-700 mb-6">
-            Sign In
+      <Navbar showAuthButtons={false} />
+
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#E8F0FF] via-[#F4F8FF] to-[#DDEBFF] p-4 pt-28">
+        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-10 border border-[#C5DAFF]">
+          
+          {/* Heading */}
+          <h2 className="text-3xl font-extrabold text-center bg-gradient-to-r from-[#0066FF] to-[#00BFFF] bg-clip-text text-transparent mb-2">
+            Welcome Back 👋
           </h2>
-          <form onSubmit={handleLogin} className="space-y-5">
+
+          <p className="text-center text-[#1F2A44] mb-8 text-base">
+            Sign in to continue your journey with{" "}
+            <span className="font-semibold bg-gradient-to-r from-[#0047AB] to-[#00BFFF] bg-clip-text text-transparent">
+              JobTracker
+            </span>
+          </p>
+
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-6">
+            {/* Email */}
             <div>
-              <label className="block text-teal-700 mb-1">Email</label>
+              <label className="block text-[#1F2A44] font-semibold mb-1">
+                Email Address
+              </label>
               <input
                 type="email"
-                id="email"
                 name="email"
                 placeholder="you@example.com"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 outline-none"
+                className="w-full px-4 py-2 border border-[#A7C8F9] rounded-lg focus:ring-2 focus:ring-[#0066FF] outline-none transition shadow-sm"
               />
             </div>
 
+            {/* Password */}
             <div className="relative">
-              <label className="block text-teal-700 mb-1">Password</label>
+              <label className="block text-[#1F2A44] font-semibold mb-1">
+                Password
+              </label>
+
               <input
                 type={showPassword ? "text" : "password"}
-                id="password"
                 name="password"
                 placeholder="••••••••"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-400 outline-none"
+                className="w-full px-4 py-2 border border-[#A7C8F9] rounded-lg focus:ring-2 focus:ring-[#0066FF] outline-none transition shadow-sm"
               />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-9 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-10 text-gray-500 hover:text-[#1F2A44] transition"
               >
                 {showPassword ? (
                   <EyeSlashIcon className="h-5 w-5" />
@@ -77,18 +95,30 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <button
+            {/* Submit */}
+            <motion.button
+              whileHover={{
+                scale: 1.05,
+                background: "linear-gradient(90deg, #007BFF 0%, #00BFFF 100%)",
+                color: "#fff",
+                boxShadow: "0 4px 12px rgba(0, 191, 255, 0.4)",
+              }}
+              transition={{ duration: 0.3 }}
               type="submit"
-              className="w-full bg-gradient-to-r from-teal-500 to-blue-500 text-white py-2 rounded-lg font-semibold shadow-md hover:from-teal-600 hover:to-blue-600 transition duration-300"
+              className="w-full bg-[#1F2A44] text-white py-2.5 rounded-xl font-semibold shadow-md"
             >
               Sign In
-            </button>
+            </motion.button>
           </form>
 
-          <p className="text-center text-teal-700 text-sm mt-4">
+          {/* Sign Up */}
+          <p className="text-center text-[#1F2A44] text-sm mt-5">
             Don’t have an account?{" "}
-            <Link to="/signup" className="text-blue-600 hover:underline">
-              Sign Up
+            <Link
+              to="/signup"
+              className="text-[#0066FF] font-semibold hover:underline"
+            >
+              Create one now
             </Link>
           </p>
         </div>
