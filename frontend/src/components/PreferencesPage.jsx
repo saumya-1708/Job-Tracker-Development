@@ -2,9 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { motion } from "framer-motion";
+import { Range } from "react-range";
 
 export default function PreferencesPage() {
   const navigate = useNavigate();
+  const MIN = 1;
+  const MAX = 50;
 
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [selectedLocations, setSelectedLocations] = useState([]);
@@ -198,57 +201,85 @@ export default function PreferencesPage() {
                 Experience (in years)
               </label>
 
-              <input
-                type="number"
-                min="0"
-                max="40"
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
-                className="w-full border border-[#C8D9FB] rounded-xl p-3 focus:ring-2 focus:ring-[#4A90E2]/40 outline-none"
-                placeholder="e.g. 2"
-              />
+              <div className="flex items-center gap-3 mb-2">
+                <input
+                  type="checkbox"
+                  id="noExp"
+                  checked={experience === "none"}
+                  onChange={(e) =>
+                    setExperience(e.target.checked ? "none" : "")
+                  }
+                />
+                <label htmlFor="noExp" className="text-[#2F3A4A]">
+                  I’m just getting started
+                </label>
+              </div>
+
+              {experience !== "none" && (
+                <input
+                  type="number"
+                  min="0"
+                  max="40"
+                  value={experience}
+                  onChange={(e) => setExperience(e.target.value)}
+                  className="w-full border border-[#C8D9FB] rounded-xl p-3 focus:ring-2 focus:ring-[#4A90E2]/40 outline-none"
+                  placeholder="e.g. 1"
+                />
+              )}
 
               {errors.experience && (
                 <p className="text-red-500 mt-1">{errors.experience}</p>
               )}
             </div>
 
+
             {/* Salary Slider */}
             <div>
-              <label className="block text-[#2F3A4A] font-semibold mb-2">
-                Salary Expectation (in LPA)
-              </label>
+  <label className="block text-[#2F3A4A] font-semibold mb-2">
+    Salary Expectation (in LPA)
+  </label>
 
-              <div className="bg-[#F8FAFF] p-4 rounded-xl border border-[#D6E4FF]">
-                <input
-                  type="range"
-                  min="1"
-                  max="50"
-                  value={salary[0]}
-                  onChange={(e) =>
-                    setSalary([Math.min(+e.target.value, salary[1]), salary[1]])
-                  }
-                  className="w-full accent-[#007BFF]"
-                />
-                <input
-                  type="range"
-                  min="1"
-                  max="50"
-                  value={salary[1]}
-                  onChange={(e) =>
-                    setSalary([salary[0], Math.max(+e.target.value, salary[0])])
-                  }
-                  className="w-full accent-[#007BFF]"
-                />
+  <div className="bg-[#F8FAFF] p-4 rounded-xl border border-[#D6E4FF]">
+    <Range
+      step={1}
+      min={MIN}
+      max={MAX}
+      values={salary}
+      onChange={(values) => setSalary(values)}
+      renderTrack={({ props, children }) => (
+        <div
+          {...props}
+          className="w-full h-2 bg-[#E0EAFF] rounded-full relative"
+        >
+          {/* Highlighted selected range */}
+          <div
+            className="absolute h-2 bg-[#007BFF] rounded-full"
+            style={{
+              left: `${(salary[0] / MAX) * 100}%`,
+              width: `${((salary[1] - salary[0]) / MAX) * 100}%`,
+            }}
+          />
 
-                <p className="mt-2 text-gray-700 text-center">
-                  💰 Range:{" "}
-                  <span className="font-semibold text-[#2F3A4A]">
-                    {salary[0]} LPA - {salary[1]} LPA
-                  </span>
-                </p>
-              </div>
-            </div>
+          {children}
+        </div>
+      )}
+      renderThumb={({ props }) => (
+        <div
+          {...props}
+          className="h-5 w-5 bg-white border-2 border-[#007BFF] rounded-full shadow-md"
+        />
+      )}
+    />
+
+    <p className="mt-2 text-gray-700 text-center">
+      💰 Range:{" "}
+      <span className="font-semibold text-[#2F3A4A]">
+        {salary[0]} LPA - {salary[1]} LPA
+      </span>
+    </p>
+  </div>
+</div>
+
 
             {/* Submit */}
             <motion.button
