@@ -30,7 +30,10 @@ export default function Navbar({ showAuthButtons = true }) {
   const hideMenu =
   location.pathname === "/profile" ||
   location.pathname === "/login" ||
-  location.pathname === "/signup";
+  location.pathname === "/signup" || 
+  location.pathname === "/preferences" ||
+  location.pathname.startsWith("/jobs/") ||
+  location.pathname === "/jobs";
 
 
   return (

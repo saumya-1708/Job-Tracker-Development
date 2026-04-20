@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -20,19 +21,23 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) throw new Error("Login failed");
+      if (!res.ok) {
+        // 🔐 Do NOT expose backend details
+        setError("Incorrect email or password");
+        return;
+      }
+
       const data = await res.json();
 
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("username", data.username);
 
-      navigate("/welcome");
+      navigate("/");
     } catch (err) {
-      console.error(err);
-      alert("Network issue or login failed");
+      // 🌐 Network / server issue only
+      alert("Unable to connect to server. Please try again.");
     }
   };
-
   return (
     <>
       <Navbar showAuthButtons={false} />
@@ -44,14 +49,17 @@ export default function LoginPage() {
           <h2 className="text-3xl font-extrabold text-center bg-gradient-to-r from-[#0066FF] to-[#00BFFF] bg-clip-text text-transparent mb-2">
             Welcome Back 👋
           </h2>
-
+          {error && (
+                <div className="mb-0 text-center text-sm text-red-600 font-medium">
+                  {error}
+                </div>
+          )}
           <p className="text-center text-[#1F2A44] mb-8 text-base">
             Sign in to continue your journey with{" "}
             <span className="font-semibold bg-gradient-to-r from-[#0047AB] to-[#00BFFF] bg-clip-text text-transparent">
-              JobTracker
+              JobTracker 
             </span>
           </p>
-
           {/* Form */}
           <form onSubmit={handleLogin} className="space-y-6">
             {/* Email */}

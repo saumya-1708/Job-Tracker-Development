@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"backend/go_server/db"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
 )
@@ -18,7 +19,7 @@ func GetFileFromGridFS(fileID primitive.ObjectID) ([]byte, error) {
 	defer cancel()
 
 	// Create a GridFS bucket
-	bucket, err := gridfs.NewBucket(db.Client.Database("authdb"))
+	bucket, err := gridfs.NewBucket(db.Client.Database("jobtracker_db"))
 	if err != nil {
 		return nil, err
 	}

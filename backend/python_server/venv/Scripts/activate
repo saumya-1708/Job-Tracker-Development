@@ -41,12 +41,12 @@ case "$(uname)" in
     CYGWIN*|MSYS*|MINGW*)
         # transform D:\path\to\venv to /d/path/to/venv on MSYS and MINGW
         # and to /cygdrive/d/path/to/venv on Cygwin
-        VIRTUAL_ENV=$(cygpath 'D:\saumya\Jobtracker\Jobtracker_Dev-development\backend\python_server\venv')
+        VIRTUAL_ENV=$(cygpath 'D:\Downloads\Jobtracker_Dev-development\backend\python_server\venv')
         export VIRTUAL_ENV
         ;;
     *)
         # use the path as-is
-        export VIRTUAL_ENV='D:\saumya\Jobtracker\Jobtracker_Dev-development\backend\python_server\venv'
+        export VIRTUAL_ENV='D:\Downloads\Jobtracker_Dev-development\backend\python_server\venv'
         ;;
 esac
 

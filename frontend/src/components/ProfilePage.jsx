@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { motion } from "framer-motion";
+import { Pencil,Settings } from "lucide-react";
+
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
@@ -68,10 +70,44 @@ export default function ProfilePage() {
 
           {/* Right Panel */}
           <div className="md:w-2/3 bg-[#F9FBFF] p-10">
-            <h3 className="text-3xl font-bold text-[#1F2A44] pb-4 border-b-2 border-[#C5DAFF]">
+           <div className="flex items-center justify-between pb-4 border-b-2 border-[#C5DAFF]">
+            <h3 className="text-3xl font-bold text-[#1F2A44]">
               Profile Overview
             </h3>
 
+            {/* Icons Row */}
+            <div className="flex items-center gap-3">
+
+              {/* Edit (Pencil) */}
+              <button
+              onClick={() => navigate("/edit-profile")}
+              className="group p-2 rounded-xl border border-[#C5DAFF] bg-white 
+                        hover:bg-gradient-to-r from-[#0047AB] to-[#00BFFF] 
+                        transition shadow-sm flex items-center justify-center"
+            >
+              <Pencil
+                size={20}
+                className="text-[#0066FF] group-hover:text-white transition"
+              />
+            </button>
+
+              {/* Settings (Gear/Wheel) */}
+              <button
+                onClick={() => navigate("/settings")}
+                className="group p-2 rounded-xl border border-[#C5DAFF] bg-white 
+                          hover:bg-gradient-to-r from-[#0047AB] to-[#00BFFF] 
+                          transition shadow-sm flex items-center justify-center"
+              >
+                <Settings
+                  size={20}
+                  className="text-[#0066FF] group-hover:text-white transition"
+                />
+              </button>
+
+
+            </div>
+          </div>
+   
             {/* Error Message */}
             {error && (
               <p className="text-red-500 text-center mt-4 font-medium">{error}</p>
@@ -114,9 +150,7 @@ export default function ProfilePage() {
                   <h4 className="text-2xl font-semibold text-[#1F2A44] mb-4">
                     Quick Actions
                   </h4>
-
                   <div className="flex gap-4 flex-wrap">
-
                     {/* Button 1 */}
                     <motion.button
                       whileHover={{
@@ -130,16 +164,6 @@ export default function ProfilePage() {
                     >
                       View Job Searches
                     </motion.button>
-
-                    {/* Button 2 */}
-                    <button className="bg-[#EAF2FF] border border-[#C5DAFF] text-[#1F2A44] px-6 py-2 rounded-full hover:bg-[#D7E8FF] transition">
-                      Edit Profile
-                    </button>
-
-                    {/* Button 3 */}
-                    <button className="bg-white border border-[#C5DAFF] text-[#1F2A44] px-6 py-2 rounded-full hover:bg-[#F2F7FF] transition">
-                      Settings
-                    </button>
                   </div>
                 </div>
               </>
